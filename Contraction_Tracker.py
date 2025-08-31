@@ -3,9 +3,14 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.graphics import Rectangle
+from kivy.uix.widget import Widget
 from kivy.clock import Clock
 import time
 from kivy.logger import Logger
+from kivy.uix.popup import Popup
+from kivy.uix.gridlayout import GridLayout
+
 
 id_contraction = 1
 promedio = []
@@ -16,6 +21,8 @@ class StopwatchApp(App):
     def build(self):
         self.root_layout = BoxLayout(orientation='vertical', padding=20)
 
+        self.leyend = Label(text='', font_size='30sp')
+        self.root_layout.add_widget(self.leyend)
         self.time_label = Label(text='00:00.00', font_size='50sp')
         self.root_layout.add_widget(self.time_label)
 
@@ -32,6 +39,8 @@ class StopwatchApp(App):
         self.buttons_layout.add_widget(self.end_button)
         self.buttons_layout.add_widget(self.reset_button)
         self.root_layout.add_widget(self.buttons_layout)
+
+
 
         self.remaining_time=0.0
         self.start_time = None
@@ -51,7 +60,7 @@ class StopwatchApp(App):
 
     def update_time(self, dt,id_clock):
         """Actualiza el temporizador y la etiqueta."""
-        if self.remaining_time <= 5:
+        if self.remaining_time <= 2:
             if self.start_time:
                 self.elapsed_time = time.time() - self.start_time
 
@@ -70,7 +79,10 @@ class StopwatchApp(App):
                 time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.elapsed_time * 100 % 100):02d}'
                 self.time_label_n.text = time_string
         else:
-            self.end_contraction(self)
+            self.on_pause()
+            if self.elapsed_time!=0:
+                self.end_contraction(self)
+            
             n=0
             suma=0
             Logger.info(promedio)
@@ -79,27 +91,33 @@ class StopwatchApp(App):
                     continue
                 n+=1
                 suma= i+suma
-            prom=suma/n
-            Logger.info(prom)
-            self.prom_label = Label(text=str(prom), font_size='50sp')
-            self.root_layout.add_widget(self.prom_label)
-            time.sleep(5)      
+            prom = suma/n
+            minutes, seconds = divmod(prom, 60)
+            f_prom = f'{int(minutes):02d}:{int(seconds):02d}.{int(prom * 100 % 100):02d}'
+            self.leyend.text=('El promedio de duración de contracciones es: '+f_prom+
+                '\nLa cantidad de contracciones es: '+str(n)+
+                '\n\nSalir')
+    
+
             
     def start_timer(self, instance):
         """Inicia o reanuda el cronómetro."""
-        self.new_contraction()
-        self.timer_event1 = Clock.schedule_interval(lambda dt: self.update_time(dt,1), 0.01) # Actualiza cada 0.01 segundos
-        self.start_time1=time.time()-self.remaining_time
-        
-        self.start_time = time.time() # Restaura el tiempo si se había pausado
-        self.timer_event = Clock.schedule_interval(lambda dt: self.update_time(dt,2), 0.01) # Actualiza cada 0.01 segundos     
+        if self.elapsed_time!=0:
+            pass
+        else:
+            self.new_contraction()
+            self.timer_event1 = Clock.schedule_interval(lambda dt: self.update_time(dt,1), 0.01) # Actualiza cada 0.01 segundos
+            self.start_time1=time.time()-self.remaining_time
+
+            self.start_time = time.time() # Restaura el tiempo si se había pausado
+            self.timer_event = Clock.schedule_interval(lambda dt: self.update_time(dt,2), 0.01) # Actualiza cada 0.01 segundos     
 
     def end_contraction(self, instance):
         """Pausa el cronómetro."""
         global id_contraction, promedio
 
         id_contraction = id_contraction + 1
-        promedio.insert(id_contraction,self.elapsed_time)
+        promedio.insert(id_contraction,round(self.elapsed_time,2))
 
         if self.timer_event:
             Clock.unschedule(self.timer_event) # Cancela la llamada programada
@@ -119,7 +137,10 @@ class StopwatchApp(App):
         self.root.clear_widgets()
         self.stop()
         self.__init__()
-        self.run()
+        self.run() 
+
+class divider(Widget):
+    pass
 
 if __name__ == '__main__':
     StopwatchApp().run()
