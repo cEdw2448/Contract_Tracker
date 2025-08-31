@@ -7,7 +7,7 @@ from kivy.clock import Clock
 import time
 from kivy.logger import Logger
 
-id_contraction = 0
+id_contraction = 1
 promedio = []
 
 kivy.require('2.3.1') # Especifica una versión de Kivy si es necesario
@@ -41,65 +41,80 @@ class StopwatchApp(App):
         return self.root_layout
     
     def new_contraction(self):
-        global id_contraction, promedio
-        id_contraction = id_contraction + 1
-        i=id_contraction//2
-        promedio.insert(i,self.elapsed_time)
-
-        self.time_label_n = Label(text="Contraction "+str(i), font_size='50sp')
+        self.con_label = Label(text="Contraction "+str(id_contraction), font_size='50sp')
+        self.root_layout.add_widget(self.con_label)
+        self.time_label_n = Label(text="00:00:00"+str(id_contraction), font_size='50sp')
         self.root_layout.add_widget(self.time_label_n)
         self.start_time = time.time()
-        self.elapsed_time = 0.0
-        self.timer_event = None
+    
         return self.root_layout
 
     def update_time(self, dt,id_clock):
         """Actualiza el temporizador y la etiqueta."""
-        #while self.remaining_time <=10:
-        if self.start_time:
-            self.elapsed_time = time.time() - self.start_time
-            
-        if self.start_time1:
-            self.remaining_time = time.time() - self.start_time1
-            
-        if id_clock==1:
-        # Formatear el tiempo
-            minutes, seconds = divmod(self.remaining_time, 60)
-            time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.remaining_time * 100 % 100):02d}'
-            self.time_label.text = time_string
-            
-        if id_clock==2:
-            # Formatear el tiempo
-            minutes, seconds = divmod(self.elapsed_time, 60)
-            time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.elapsed_time * 100 % 100):02d}'
-            self.time_label_n.text = time_string
-        #else:
-         #   for i in promedio:
-          #      n=n+1
-           #     suma=i+suma
-            #prom=suma/n
-            #Logger.info(prom)
-            #time.sleep(5)
+        if self.remaining_time <= 5:
+            if self.start_time:
+                self.elapsed_time = time.time() - self.start_time
+
+            if self.start_time1:
+                self.remaining_time = time.time() - self.start_time1
+
+            if id_clock==1:
+                    # Formatear el tiempo
+                minutes, seconds = divmod(self.remaining_time, 60)
+                time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.remaining_time * 100 % 100):02d}'
+                self.time_label.text = time_string
+
+            if id_clock==2:
+                # Formatear el tiempo
+                minutes, seconds = divmod(self.elapsed_time, 60)
+                time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.elapsed_time * 100 % 100):02d}'
+                self.time_label_n.text = time_string
+        else:
+            self.end_contraction(self)
+            n=0
+            suma=0
+            Logger.info(promedio)
+            for i in promedio:
+                if i==0:
+                    continue
+                n+=1
+                suma= i+suma
+            prom=suma/n
+            Logger.info(prom)
+            self.prom_label = Label(text=str(prom), font_size='50sp')
+            self.root_layout.add_widget(self.prom_label)
+            time.sleep(5)      
             
     def start_timer(self, instance):
         """Inicia o reanuda el cronómetro."""
-        
+        self.new_contraction()
         self.timer_event1 = Clock.schedule_interval(lambda dt: self.update_time(dt,1), 0.01) # Actualiza cada 0.01 segundos
         self.start_time1=time.time()-self.remaining_time
-
-        self.new_contraction()         
+        
         self.start_time = time.time() # Restaura el tiempo si se había pausado
         self.timer_event = Clock.schedule_interval(lambda dt: self.update_time(dt,2), 0.01) # Actualiza cada 0.01 segundos     
 
     def end_contraction(self, instance):
         """Pausa el cronómetro."""
+        global id_contraction, promedio
+
+        id_contraction = id_contraction + 1
+        promedio.insert(id_contraction,self.elapsed_time)
+
         if self.timer_event:
             Clock.unschedule(self.timer_event) # Cancela la llamada programada
+            self.elapsed_time = 0.0
+            self.timer_event = None
+            self.start_time = None
             # Mantenemos slf.start_time en None para que la siguiente actualización se base en self.elapsed_time
-            self.new_contraction()
 
     def reset(self, instance):
-        """Reinicia el cronómetro a cero."""
+        """Reinicia todo."""
+        global promedio
+        global id_contraction
+
+        id_contraction=0
+        promedio=[]
         self.remaining_time,self.start_time1=0,0
         self.root.clear_widgets()
         self.stop()
