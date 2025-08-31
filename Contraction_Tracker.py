@@ -10,6 +10,8 @@ import time
 from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.uix.gridlayout import GridLayout
+from kivy.core.window import Window
+
 
 
 id_contraction = 1
@@ -17,19 +19,39 @@ promedio = []
 
 kivy.require('2.3.1') # Especifica una versión de Kivy si es necesario
 
-class StopwatchApp(App):
+class Tracker(App):
     def build(self):
-        self.root_layout = BoxLayout(orientation='vertical', padding=20)
+        self.root_layout = BoxLayout(orientation='vertical', padding=25, spacing=10)
 
-        self.leyend = Label(text='', font_size='30sp')
-        self.root_layout.add_widget(self.leyend)
-        self.time_label = Label(text='00:00.00', font_size='50sp')
-        self.root_layout.add_widget(self.time_label)
+        self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1),size_hint=(1,.5))
+        self.root_layout.add_widget(self.leyend)    
+        self.time_label = Label(text='00:00.00', font_size='50sp', color=(0,0,0,1),size_hint=(1,.8))
 
-        self.buttons_layout = BoxLayout(spacing=10)
-        self.start_button = Button(text='Inicio contracción')
-        self.end_button = Button(text='Fin contracción')
-        self.reset_button = Button(text='Reiniciar')
+        self.buttons_layout = BoxLayout(orientation='horizontal', spacing=10,size_hint=(1,.5))
+
+        self.start_button   = Button(
+            text                ='Inicio contracción',
+            size_hint           = (.7, .8),
+            font_size           = 22,
+            background_color    = (1.80, 2.40, 2.26, 1),
+            color               = (0,0,0,1)
+            )
+
+        self.end_button     = Button(
+            text                ='Fin contracción',
+            size_hint           = (.7, .8),
+            font_size           = 22,
+            background_color    = (1.80, 2.40, 2.26, 1),
+            color               = (0,0,0,1)
+            )
+
+        self.reset_button   = Button(
+            text                ='Reiniciar',
+            size_hint           = (.7, .8),
+            font_size           = 22,
+            background_color    = (1.80, 2.40, 2.26, 1),
+            color               = (0,0,0,1)
+            )
 
         self.start_button.bind(on_press=self.start_timer)
         self.end_button.bind(on_press=self.end_contraction)
@@ -39,7 +61,9 @@ class StopwatchApp(App):
         self.buttons_layout.add_widget(self.end_button)
         self.buttons_layout.add_widget(self.reset_button)
         self.root_layout.add_widget(self.buttons_layout)
-
+        self.root_layout.add_widget(self.time_label)
+        self.grid=GridLayout(cols=2)
+        self.root_layout.add_widget(self.grid)
 
 
         self.remaining_time=0.0
@@ -47,20 +71,21 @@ class StopwatchApp(App):
         self.elapsed_time = 0.0
         self.timer_event1 = None
 
+        Window.clearcolor = (2.20, 2.38, 2.36, 0.8)
         return self.root_layout
     
     def new_contraction(self):
-        self.con_label = Label(text="Contraction "+str(id_contraction), font_size='50sp')
-        self.root_layout.add_widget(self.con_label)
-        self.time_label_n = Label(text="00:00:00"+str(id_contraction), font_size='50sp')
-        self.root_layout.add_widget(self.time_label_n)
+        self.con_label = Label(text="Contraction "+str(id_contraction), font_size='20sp',color=(0,0,0,1))
+        self.grid.add_widget(self.con_label)
+        self.time_label_n = Label(text="00:00:00"+str(id_contraction), font_size='20sp',color=(0,0,0,1))
+        self.grid.add_widget(self.time_label_n)
         self.start_time = time.time()
     
         return self.root_layout
 
     def update_time(self, dt,id_clock):
         """Actualiza el temporizador y la etiqueta."""
-        if self.remaining_time <= 2:
+        if self.remaining_time <= 3:
             if self.start_time:
                 self.elapsed_time = time.time() - self.start_time
 
@@ -79,13 +104,12 @@ class StopwatchApp(App):
                 time_string = f'{int(minutes):02d}:{int(seconds):02d}.{int(self.elapsed_time * 100 % 100):02d}'
                 self.time_label_n.text = time_string
         else:
-            self.on_pause()
+            
             if self.elapsed_time!=0:
                 self.end_contraction(self)
             
             n=0
             suma=0
-            Logger.info(promedio)
             for i in promedio:
                 if i==0:
                     continue
@@ -94,12 +118,10 @@ class StopwatchApp(App):
             prom = suma/n
             minutes, seconds = divmod(prom, 60)
             f_prom = f'{int(minutes):02d}:{int(seconds):02d}.{int(prom * 100 % 100):02d}'
-            self.leyend.text=('El promedio de duración de contracciones es: '+f_prom+
-                '\nLa cantidad de contracciones es: '+str(n)+
-                '\n\nSalir')
-    
-
-            
+            self.leyend.text=('Promedio de duración de contracciones: '+f_prom+
+                '\nCantidad de contracciones: '+str(n))
+            self.on_pause()
+           
     def start_timer(self, instance):
         """Inicia o reanuda el cronómetro."""
         if self.elapsed_time!=0:
@@ -139,8 +161,5 @@ class StopwatchApp(App):
         self.__init__()
         self.run() 
 
-class divider(Widget):
-    pass
-
 if __name__ == '__main__':
-    StopwatchApp().run()
+    Tracker().run()
