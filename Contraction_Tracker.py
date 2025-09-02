@@ -85,7 +85,7 @@ class Tracker(App):
 
     def update_time(self, dt,id_clock):
         """Actualiza el temporizador y la etiqueta."""
-        if self.remaining_time <= 3:
+        if self.remaining_time <= 600:
             if self.start_time:
                 self.elapsed_time = time.time() - self.start_time
 
