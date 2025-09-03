@@ -32,17 +32,17 @@ class Tracker(App):
         Window.clearcolor = BG_COLOR
         
         self.root_layout = BoxLayout(orientation='vertical', padding=sp(25), spacing=sp(10))
-
-        # Etiqueta para el temporizador total de la sesión
-        self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1), size_hint=(1,.5))
-        
         
         # Etiqueta para el cronómetro de la contracción actual
         self.time_label = Label(text='00:00.00', font_size='50sp', color=(0,0,0,1), size_hint=(1,.8))
         self.root_layout.add_widget(self.time_label)
-        self.root_layout.add_widget(self.leyend)
-        self.buttons_layout = BoxLayout(orientation='horizontal', spacing=sp(10), size_hint=(1,.5))
 
+        # Etiqueta para el temporizador total de la sesión
+        self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1), size_hint=(1,.5))
+        self.root_layout.add_widget(self.leyend)
+
+        # Botones
+        self.buttons_layout = BoxLayout(orientation='horizontal', spacing=sp(10), size_hint=(1,.5))
         self.start_button = Button(
             text='Inicio contracción',
             size_hint=(.7, .8),
