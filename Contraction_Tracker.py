@@ -12,8 +12,8 @@ from kivy.logger import Logger
 from kivy.utils import get_color_from_hex as getHex
 
 # Asegúrate de que los valores de color estén entre 0.0 y 1.0
-BG_COLOR = (2.20/2.55, 2.38/2.55, 2.36/2.55, 0.8)
-BUTTON_COLOR = getHex('#c9ffe8')
+BG_COLOR = (231/255, 240/255, 249/255, 0.1)
+BUTTON_COLOR = (159/255, 197/255, 232/255, 0.5)
 
 class Tracker(App):
     def __init__(self, **kwargs):
@@ -35,19 +35,19 @@ class Tracker(App):
         self.root_layout = BoxLayout(orientation='vertical', padding=sp(25), spacing=sp(10))
         
         # Etiqueta para el cronómetro de la contracción actual
-        self.time_label = Label(text='00:00.00', font_size='50sp', color=(0,0,0,1), size_hint=(1,.8))
+        self.time_label = Label(text='00:00.00', font_size='50sp', color=(0,0,0,1), size_hint=(1,.15))
         self.time_label.bind(size=self.set_size)
         self.root_layout.add_widget(self.time_label)
 
         # Etiqueta para el temporizador total de la sesión
-        self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1), size_hint=(1,.5))
+        self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1), size_hint=(1,.1))
         self.leyend.bind(size=self.set_size)
         self.root_layout.add_widget(self.leyend)
 
         # Botones
-        self.buttons_layout = BoxLayout(orientation='horizontal', spacing=sp(10), size_hint=(1,.5))
+        self.buttons_layout = BoxLayout(orientation='horizontal', spacing=sp(10), size_hint=(1,.1))
         self.start_button = Button(
-            text='Inicio contracción',
+            text='Inicio',
             size_hint=(.7, .8),
             font_size=sp(22),
             background_color=BUTTON_COLOR,
@@ -58,7 +58,7 @@ class Tracker(App):
         )
         
         self.end_button = Button(
-            text='Fin contracción',
+            text='Fin',
             size_hint=(.7, .8),
             font_size=sp(22),
             background_color=BUTTON_COLOR,
@@ -92,8 +92,11 @@ class Tracker(App):
         self.root_layout.add_widget(self.buttons_layout)
         
         
-        self.grid = GridLayout(cols=2)
+        self.grid = GridLayout(cols=2, spacing=sp(5), size_hint=(1,.60))
         self.root_layout.add_widget(self.grid)
+
+        self.tqm = Label(text='Para la mejor doctora. Te amito <3', font_size='10sp', color=(0,0,0,0.5), size_hint=(1,.1))
+        self.root_layout.add_widget(self.tqm)
 
         return self.root_layout
 
@@ -175,7 +178,7 @@ class Tracker(App):
 
         # Agrega las etiquetas de la nueva contracción en la cuadrícula
         self.con_label = Label(text=f'Contracción {self.id_contraction}', font_size='20sp', color=(0,0,0,1))
-        self.time_label_n = Label(text=f'Duración: {time_string}', font_size='20sp', color=(0,0,0,1))
+        self.time_label_n = Label(text=f'{time_string}', font_size='20sp', color=(0,0,0,1))
         self.con_label.bind(size=self.set_size)
         self.time_label_n.bind(size=self.set_size)
         self.grid.add_widget(self.con_label)
