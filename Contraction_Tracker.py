@@ -9,10 +9,11 @@ import time
 from kivy.core.window import Window
 from kivy.metrics import sp
 from kivy.logger import Logger
+from kivy.utils import get_color_from_hex as getHex
 
 # Asegúrate de que los valores de color estén entre 0.0 y 1.0
 BG_COLOR = (2.20/2.55, 2.38/2.55, 2.36/2.55, 0.8)
-BUTTON_COLOR = (0.7, 0.94, 0.8, 1)
+BUTTON_COLOR = getHex('#c9ffe8')
 
 class Tracker(App):
     def __init__(self, **kwargs):
@@ -26,7 +27,7 @@ class Tracker(App):
         self.timer_event_CTR = None
         self.elapsed_time_total = 0.0
         self.elapsed_time_CTR = 0.0
-        self.time_limit = 5
+        self.time_limit = 600
 
     def build(self):
         Window.clearcolor = BG_COLOR
@@ -35,10 +36,12 @@ class Tracker(App):
         
         # Etiqueta para el cronómetro de la contracción actual
         self.time_label = Label(text='00:00.00', font_size='50sp', color=(0,0,0,1), size_hint=(1,.8))
+        self.time_label.bind(size=self.set_size)
         self.root_layout.add_widget(self.time_label)
 
         # Etiqueta para el temporizador total de la sesión
         self.leyend = Label(text='', font_size='22sp', color=(0,0,0,1), size_hint=(1,.5))
+        self.leyend.bind(size=self.set_size)
         self.root_layout.add_widget(self.leyend)
 
         # Botones
@@ -48,7 +51,10 @@ class Tracker(App):
             size_hint=(.7, .8),
             font_size=sp(22),
             background_color=BUTTON_COLOR,
-            color=(0,0,0,1)
+            color=(0,0,0,1),
+            text_size=(None, None),
+            halign='center',
+            valign='middle'
         )
         
         self.end_button = Button(
@@ -56,7 +62,10 @@ class Tracker(App):
             size_hint=(.7, .8),
             font_size=sp(22),
             background_color=BUTTON_COLOR,
-            color=(0,0,0,1)
+            color=(0,0,0,1),
+            text_size=(None, None),
+            halign='center',
+            valign='middle'
         )
 
         self.reset_button = Button(
@@ -64,12 +73,18 @@ class Tracker(App):
             size_hint=(.7, .8),
             font_size=sp(22),
             background_color=BUTTON_COLOR,
-            color=(0,0,0,1)
+            color=(0,0,0,1),
+            text_size=(None, None),
+            halign='center',
+            valign='middle'
         )
 
         self.start_button.bind(on_press=self.start_timer)
         self.end_button.bind(on_press=self.end_contraction)
         self.reset_button.bind(on_press=self.reset)
+        self.start_button.bind(size=self.set_size)
+        self.end_button.bind(size=self.set_size)
+        self.reset_button.bind(size=self.set_size)
 
         self.buttons_layout.add_widget(self.start_button)
         self.buttons_layout.add_widget(self.end_button)
@@ -81,6 +96,13 @@ class Tracker(App):
         self.root_layout.add_widget(self.grid)
 
         return self.root_layout
+
+    def set_size(self, instance, value):
+        """Ajusta el tamaño del texto para que se ajuste al botón."""
+        # Establece el tamaño del texto con un ancho fijo (el del botón) y una altura ilimitada
+        instance.text_size = (instance.width, None)
+        instance.valign = 'middle'
+        instance.halign = 'center'
 
     def update_time(self, dt):
         """Actualiza los temporizadores de la sesión y la contracción."""
@@ -154,6 +176,8 @@ class Tracker(App):
         # Agrega las etiquetas de la nueva contracción en la cuadrícula
         self.con_label = Label(text=f'Contracción {self.id_contraction}', font_size='20sp', color=(0,0,0,1))
         self.time_label_n = Label(text=f'Duración: {time_string}', font_size='20sp', color=(0,0,0,1))
+        self.con_label.bind(size=self.set_size)
+        self.time_label_n.bind(size=self.set_size)
         self.grid.add_widget(self.con_label)
         self.grid.add_widget(self.time_label_n)
 
